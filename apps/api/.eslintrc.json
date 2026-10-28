@@ -16,8 +16,7 @@
     "sourceType": "module",
     "project": [
       "./tsconfig.json"
-    ],
-    "tsconfigRootDir": "."
+    ]
   },
   "plugins": [
     "@typescript-eslint",
