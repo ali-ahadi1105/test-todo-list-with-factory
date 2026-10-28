@@ -16,20 +16,35 @@
   "parserOptions": {
     "ecmaVersion": "latest",
     "sourceType": "module",
-    "project": ["./tsconfig.json"],
-    "tsconfigRootDir": "/home/morty/.openhands/agent-canvas/workspaces/automation-runs/f13e43ea-3b07-4da8-8199-bbc14dfe5e18/apps/web"
+    "project": [
+      "./tsconfig.json"
+    ],
+    "tsconfigRootDir": "."
   },
-  "plugins": ["@typescript-eslint", "react-hooks", "prettier"],
+  "plugins": [
+    "@typescript-eslint",
+    "react-hooks",
+    "prettier"
+  ],
   "rules": {
     "prettier/prettier": "error",
     "@typescript-eslint/no-unused-vars": [
       "error",
-      { "argsIgnorePattern": "^_" }
+      {
+        "argsIgnorePattern": "^_"
+      }
     ],
     "@typescript-eslint/no-explicit-any": "warn",
     "@typescript-eslint/explicit-function-return-type": "off",
     "@typescript-eslint/explicit-module-boundary-types": "off",
     "react-hooks/exhaustive-deps": "warn"
   },
-  "ignorePatterns": ["node_modules/", "dist/", "build/", ".next/", "*.config.js", "*.config.ts"]
+  "ignorePatterns": [
+    "node_modules/",
+    "dist/",
+    "build/",
+    ".next/",
+    "*.config.js",
+    "*.config.ts"
+  ]
 }
