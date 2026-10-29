@@ -23,5 +23,5 @@
     "typeRoots": ["./node_modules/@types", "./src/common/types"]
   },
   "include": ["src/**/*", "src/common/types/**/*"],
-  "exclude": ["test/**/*", "dist/**/*", "node_modules/**/*"]
+  "exclude": ["dist/**/*", "node_modules/**/*", "test/**/*"]
 }

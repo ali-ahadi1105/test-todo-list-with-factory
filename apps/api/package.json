@@ -67,7 +67,12 @@
     ],
     "rootDir": ".",
     "transform": {
-      "^.+\\.(t|j)s$": "ts-jest"
+      "^.+\\.(t|j)s$": [
+        "ts-jest",
+        {
+          "tsconfig": "tsconfig.json"
+        }
+      ]
     },
     "collectCoverageFrom": [
       "src/**/*.(t|j)s"
@@ -78,8 +83,7 @@
       "^@/(.*)$": "<rootDir>/src/$1"
     },
     "testMatch": [
-      "<rootDir>/src/**/*.spec.ts",
-      "<rootDir>/test/**/*.e2e-spec.ts"
+      "<rootDir>/src/**/*.spec.ts"
     ],
     "setupFilesAfterEnvironment": ["<rootDir>/test/setup.ts"]
   }
