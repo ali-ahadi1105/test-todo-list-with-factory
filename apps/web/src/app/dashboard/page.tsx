@@ -191,6 +191,61 @@ function DashboardContent() {
     setDropTargetTaskId(null);
   };
 
+  // Subtask handlers
+  const handleCreateSubtask = async (task: Task, title: string) => {
+    if (!projectId) return;
+    try {
+      await api.createSubtask(projectId, task.id, { title });
+      refetchTasks();
+    } catch (error) {
+      console.error('Failed to create subtask:', error);
+    }
+  };
+
+  const handleToggleSubtask = async (subtask: { id: string; completed: boolean }) => {
+    if (!projectId) return;
+    // Find the task that owns this subtask
+    const parentTask = tasks.find((t) => t.subtasks?.some((s) => s.id === subtask.id));
+    if (parentTask) {
+      try {
+        await api.toggleSubtask(projectId, parentTask.id, subtask.id, subtask.completed);
+        refetchTasks();
+      } catch (error) {
+        console.error('Failed to toggle subtask:', error);
+      }
+    }
+  };
+
+  const handleDeleteSubtask = async (subtask: { id: string }) => {
+    if (!projectId) return;
+    // Find the task that owns this subtask
+    const parentTask = tasks.find((t) => t.subtasks?.some((s) => s.id === subtask.id));
+    if (parentTask) {
+      try {
+        await api.deleteSubtask(projectId, parentTask.id, subtask.id);
+        refetchTasks();
+      } catch (error) {
+        console.error('Failed to delete subtask:', error);
+      }
+    }
+  };
+
+  // Section handlers - commented out as not yet wired up in UI
+  // const handleCreateSection = (name: string) => {
+  //   createSectionMutation.mutate({ name }, {
+  //     onSuccess: () => {
+  //       refetchTasks();
+  //       // Also invalidate project query to get updated sections
+  //     },
+  //   });
+  // };
+
+  // const handleDeleteSection = (sectionId: string) => {
+  //   deleteSectionMutation.mutate(sectionId, {
+  //     onSuccess: () => refetchTasks(),
+  //   });
+  // };
+
   // Get sections for current project
   const sections = currentProject?.sections || [];
 
@@ -356,6 +411,9 @@ function DashboardContent() {
                   onEdit={setEditingTask}
                   onDelete={handleDeleteTask}
                   onReorder={handleReorder}
+                  onAddSubtask={handleCreateSubtask}
+                  onToggleSubtask={handleToggleSubtask}
+                  onDeleteSubtask={handleDeleteSubtask}
                   draggedTaskId={draggedTaskId}
                   _onDragStart={handleDragStart}
                   _onDragOver={handleDragOver}
