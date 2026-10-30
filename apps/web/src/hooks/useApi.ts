@@ -22,6 +22,12 @@ import {
   CreateSubtaskInput,
   UpdateSubtaskInput,
   ReorderSubtaskInput,
+  TasksViewResponse,
+  TaskSearchParams,
+  TodayTasksParams,
+  UpcomingTasksParams,
+  CompletedTasksParams,
+  OverdueTasksParams,
 } from '@/types/api';
 
 // Project hooks
@@ -400,4 +406,41 @@ export function isDueToday(dateString: string | null): boolean {
   const today = new Date();
   today.setHours(0, 0, 0, 0);
   return dueDate.getTime() === today.getTime();
+}
+
+// Task Views hooks
+export function useTodayTasks(params: TodayTasksParams = {}) {
+  return useQuery<TasksViewResponse>({
+    queryKey: ['tasks', 'today', params],
+    queryFn: () => api.getTodayTasks(params),
+  });
+}
+
+export function useUpcomingTasks(params: UpcomingTasksParams = {}) {
+  return useQuery<TasksViewResponse>({
+    queryKey: ['tasks', 'upcoming', params],
+    queryFn: () => api.getUpcomingTasks(params),
+  });
+}
+
+export function useCompletedTasks(params: CompletedTasksParams = {}) {
+  return useQuery<TasksViewResponse>({
+    queryKey: ['tasks', 'completed', params],
+    queryFn: () => api.getCompletedTasks(params),
+  });
+}
+
+export function useOverdueTasks(params: OverdueTasksParams = {}) {
+  return useQuery<TasksViewResponse>({
+    queryKey: ['tasks', 'overdue', params],
+    queryFn: () => api.getOverdueTasks(params),
+  });
+}
+
+export function useSearchTasks(params: TaskSearchParams = {}) {
+  return useQuery<TasksViewResponse>({
+    queryKey: ['tasks', 'search', params],
+    queryFn: () => api.searchTasks(params),
+    enabled: Object.keys(params).length > 0,
+  });
 }

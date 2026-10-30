@@ -5,6 +5,160 @@ import { PrismaService } from '../../prisma/prisma.service';
 export class TasksService {
   constructor(private prisma: PrismaService) {}
 
+  // User-level task queries
+  async findByUserId(
+    userId: string,
+    options?: {
+      completed?: boolean;
+      projectId?: string;
+      search?: string;
+      filter?: {
+        priority?: number;
+        labelId?: string;
+        overdue?: boolean;
+        dueDate?: Date | { gte?: Date; lt?: Date; lte?: Date; gt?: Date };
+        assigneeId?: string;
+      };
+      sort?: {
+        field: 'dueDate' | 'priority' | 'createdAt' | 'title' | 'position' | 'completedAt';
+        order: 'asc' | 'desc';
+      };
+      groupBy?: 'dueDate' | 'priority' | 'project' | 'section';
+      limit?: number;
+      offset?: number;
+    }
+  ) {
+    const where: any = {
+      project: { ownerId: userId },
+    };
+
+    if (options?.completed !== undefined) {
+      where.completed = options.completed;
+    }
+
+    if (options?.projectId) {
+      where.projectId = options.projectId;
+    }
+
+    if (options?.search) {
+      where.OR = [
+        { title: { contains: options.search, mode: 'insensitive' } },
+        { description: { contains: options.search, mode: 'insensitive' } },
+      ];
+    }
+
+    if (options?.filter) {
+      if (options.filter.priority) {
+        where.priority = options.filter.priority;
+      }
+      if (options.filter.labelId) {
+        where.labels = { some: { labelId: options.filter.labelId } };
+      }
+      if (options.filter.overdue) {
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        where.dueDate = { lt: today };
+        where.completed = false;
+      }
+      if (options.filter.dueDate) {
+        where.dueDate = options.filter.dueDate;
+      }
+      if (options.filter.assigneeId) {
+        where.assigneeId = options.filter.assigneeId;
+      }
+    }
+
+    // Build orderBy
+    let orderBy: any = [{ position: 'asc' }];
+    if (options?.sort) {
+      switch (options.sort.field) {
+        case 'dueDate':
+          orderBy = [{ dueDate: options.sort.order }, { position: 'asc' }];
+          break;
+        case 'priority':
+          orderBy = [{ priority: options.sort.order }, { position: 'asc' }];
+          break;
+        case 'createdAt':
+          orderBy = [{ createdAt: options.sort.order }, { position: 'asc' }];
+          break;
+        case 'title':
+          orderBy = [{ title: options.sort.order }, { position: 'asc' }];
+          break;
+        case 'position':
+          orderBy = [{ position: options.sort.order }];
+          break;
+      }
+    }
+
+    const [tasks, total] = await Promise.all([
+      this.prisma.task.findMany({
+        where,
+        include: {
+          labels: { include: { label: true } },
+          subtasks: true,
+          assignee: { select: { id: true, name: true, email: true, avatarUrl: true } },
+          section: { select: { id: true, name: true } },
+          project: { select: { id: true, name: true, color: true } },
+        },
+        orderBy,
+        take: options?.limit,
+        skip: options?.offset,
+      }),
+      this.prisma.task.count({ where }),
+    ]);
+
+    return { tasks, total };
+  }
+
+  async findToday(userId: string, options?: { includeCompleted?: boolean; projectId?: string }) {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const tomorrow = new Date(today);
+    tomorrow.setDate(tomorrow.getDate() + 1);
+
+    return this.findByUserId(userId, {
+      completed: options?.includeCompleted ? undefined : false,
+      projectId: options?.projectId,
+      filter: { dueDate: { gte: today, lt: tomorrow } },
+      sort: { field: 'dueDate', order: 'asc' },
+    });
+  }
+
+  async findUpcoming(userId: string, options?: { includeCompleted?: boolean; projectId?: string; limit?: number }) {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    return this.findByUserId(userId, {
+      completed: options?.includeCompleted ? undefined : false,
+      projectId: options?.projectId,
+      filter: { dueDate: { gte: today } },
+      sort: { field: 'dueDate', order: 'asc' },
+      limit: options?.limit,
+    });
+  }
+
+  async findCompleted(userId: string, options?: { projectId?: string; limit?: number; offset?: number }) {
+    return this.findByUserId(userId, {
+      completed: true,
+      projectId: options?.projectId,
+      sort: { field: 'completedAt', order: 'desc' },
+      limit: options?.limit,
+      offset: options?.offset,
+    });
+  }
+
+  async findOverdue(userId: string, options?: { includeCompleted?: boolean; projectId?: string }) {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    return this.findByUserId(userId, {
+      completed: options?.includeCompleted ? undefined : false,
+      projectId: options?.projectId,
+      filter: { overdue: true },
+      sort: { field: 'dueDate', order: 'asc' },
+    });
+  }
+
   async create(
     projectId: string,
     userId: string,

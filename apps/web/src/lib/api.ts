@@ -19,6 +19,12 @@ import {
   CreateSubtaskInput,
   UpdateSubtaskInput,
   ReorderSubtaskInput,
+  TasksViewResponse,
+  TaskSearchParams,
+  TodayTasksParams,
+  UpcomingTasksParams,
+  CompletedTasksParams,
+  OverdueTasksParams,
 } from '@/types/api';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000/api';
@@ -329,6 +335,53 @@ class ApiClient {
     return this.request<void>(`/projects/${projectId}/tasks/${taskId}/subtasks/${id}`, {
       method: 'DELETE',
     });
+  }
+
+  // Task Views
+  async getTodayTasks(params: TodayTasksParams = {}): Promise<TasksViewResponse> {
+    const searchParams = new URLSearchParams();
+    if (params.includeCompleted) searchParams.set('includeCompleted', 'true');
+    if (params.projectId) searchParams.set('projectId', params.projectId);
+    return this.request<TasksViewResponse>(`/tasks/today?${searchParams.toString()}`);
+  }
+
+  async getUpcomingTasks(params: UpcomingTasksParams = {}): Promise<TasksViewResponse> {
+    const searchParams = new URLSearchParams();
+    if (params.includeCompleted) searchParams.set('includeCompleted', 'true');
+    if (params.projectId) searchParams.set('projectId', params.projectId);
+    if (params.limit) searchParams.set('limit', params.limit.toString());
+    return this.request<TasksViewResponse>(`/tasks/upcoming?${searchParams.toString()}`);
+  }
+
+  async getCompletedTasks(params: CompletedTasksParams = {}): Promise<TasksViewResponse> {
+    const searchParams = new URLSearchParams();
+    if (params.projectId) searchParams.set('projectId', params.projectId);
+    if (params.limit) searchParams.set('limit', params.limit.toString());
+    if (params.offset) searchParams.set('offset', params.offset.toString());
+    return this.request<TasksViewResponse>(`/tasks/completed?${searchParams.toString()}`);
+  }
+
+  async getOverdueTasks(params: OverdueTasksParams = {}): Promise<TasksViewResponse> {
+    const searchParams = new URLSearchParams();
+    if (params.includeCompleted) searchParams.set('includeCompleted', 'true');
+    if (params.projectId) searchParams.set('projectId', params.projectId);
+    return this.request<TasksViewResponse>(`/tasks/overdue?${searchParams.toString()}`);
+  }
+
+  async searchTasks(params: TaskSearchParams = {}): Promise<TasksViewResponse> {
+    const searchParams = new URLSearchParams();
+    if (params.q) searchParams.set('q', params.q);
+    if (params.completed !== undefined) searchParams.set('completed', params.completed.toString());
+    if (params.projectId) searchParams.set('projectId', params.projectId);
+    if (params.priority !== undefined) searchParams.set('priority', params.priority.toString());
+    if (params.labelId) searchParams.set('labelId', params.labelId);
+    if (params.overdue) searchParams.set('overdue', 'true');
+    if (params.assigneeId) searchParams.set('assigneeId', params.assigneeId);
+    if (params.sortField) searchParams.set('sortField', params.sortField);
+    if (params.sortOrder) searchParams.set('sortOrder', params.sortOrder);
+    if (params.limit) searchParams.set('limit', params.limit.toString());
+    if (params.offset) searchParams.set('offset', params.offset.toString());
+    return this.request<TasksViewResponse>(`/tasks/search?${searchParams.toString()}`);
   }
 }
 
