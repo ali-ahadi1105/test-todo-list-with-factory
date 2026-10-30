@@ -15,15 +15,14 @@ export class PrismaService extends PrismaClient implements OnModuleInit, OnModul
     if (process.env.NODE_ENV === 'production') {
       throw new Error('Cannot clean database in production');
     }
-    const models = Reflect.ownKeys(this).filter(
-      (key) => typeof key === 'string' && !key.startsWith('_') && !key.startsWith('$')
-    );
-    return Promise.all(
-      models.map((model) => {
-        if (typeof this[model as string]?.deleteMany === 'function') {
-          return this[model as string].deleteMany();
-        }
-      })
-    );
+    // Delete in order to respect foreign key constraints
+    await this.taskLabel.deleteMany();
+    await this.subtask.deleteMany();
+    await this.task.deleteMany();
+    await this.section.deleteMany();
+    await this.project.deleteMany();
+    await this.label.deleteMany();
+    await this.userSettings.deleteMany();
+    await this.user.deleteMany();
   }
 }

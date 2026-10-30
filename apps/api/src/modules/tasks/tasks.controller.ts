@@ -29,6 +29,7 @@ const createTaskSchema = z.object({
     .nullable()
     .transform((val) => (val ? new Date(val) : undefined)),
   assigneeId: z.string().optional(),
+  priority: z.number().min(1).max(4).optional(),
 });
 
 const updateTaskSchema = createTaskSchema.partial().extend({

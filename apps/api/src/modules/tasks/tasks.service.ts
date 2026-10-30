@@ -14,6 +14,7 @@ export class TasksService {
       sectionId?: string;
       dueDate?: Date;
       assigneeId?: string;
+      priority?: number;
     }
   ) {
     // Verify project ownership
@@ -36,6 +37,7 @@ export class TasksService {
         ...data,
         projectId,
         position: (maxPosition._max.position || -1) + 1,
+        priority: data.priority ?? 4,
       },
       include: {
         labels: { include: { label: true } },
@@ -97,12 +99,31 @@ export class TasksService {
       sectionId?: string | null;
       dueDate?: Date | null;
       assigneeId?: string | null;
+      priority?: number;
     }
   ) {
     await this.findById(id, userId);
+
+    const updateData: Partial<{
+      title: string;
+      description: string | null;
+      completed: boolean;
+      position: number;
+      sectionId: string | null;
+      dueDate: Date | null;
+      assigneeId: string | null;
+      priority: number;
+      completedAt: Date | null;
+    }> = { ...data };
+
+    // Handle completion timestamp
+    if (data.completed !== undefined) {
+      updateData.completedAt = data.completed ? new Date() : null;
+    }
+
     return this.prisma.task.update({
       where: { id },
-      data,
+      data: updateData,
       include: {
         labels: { include: { label: true } },
         subtasks: true,
