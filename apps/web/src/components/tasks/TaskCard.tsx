@@ -51,6 +51,7 @@ export function TaskCard({
   return (
     <div
       draggable={true}
+      data-task-id={task.id}
       onDragStart={(e) => onDragStart?.(e, task)}
       className={cn(
         'group relative rounded-lg border border-neutral-200 bg-white p-4 shadow-sm',

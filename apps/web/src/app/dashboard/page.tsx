@@ -45,6 +45,7 @@ function DashboardContent() {
   const [editingTask, setEditingTask] = useState<Task | null>(null);
   const [newProjectName, setNewProjectName] = useState('');
   const [draggedTaskId, setDraggedTaskId] = useState<string | null>(null);
+  const [dropTargetTaskId, setDropTargetTaskId] = useState<string | null>(null);
 
   // Queries
   const { data: projects = [], isLoading: projectsLoading } = useProjects();
@@ -146,6 +147,16 @@ function DashboardContent() {
   const handleDragOver = (e: React.DragEvent, _sectionId?: string) => {
     e.preventDefault();
     e.dataTransfer.dropEffect = 'move';
+
+    // Track the drop target task element
+    const target = e.target as HTMLElement;
+    const taskElement = target.closest('[data-task-id]');
+    if (taskElement) {
+      const taskId = taskElement.getAttribute('data-task-id');
+      if (taskId && taskId !== draggedTaskId) {
+        setDropTargetTaskId(taskId);
+      }
+    }
   };
 
   const handleDrop = (e: React.DragEvent, sectionId?: string) => {
@@ -156,15 +167,28 @@ function DashboardContent() {
     if (!task) return;
 
     // Calculate new position based on drop target
-    const sectionTasks = tasks.filter((t) => (t.sectionId || null) === (sectionId || null));
-    const newPosition = sectionTasks.length;
+    const sectionTasks = tasks
+      .filter((t) => (t.sectionId || null) === (sectionId || null))
+      .sort((a, b) => a.position - b.position);
+
+    let newPosition = sectionTasks.length; // Default: append to end
+
+    // If there's a drop target, insert before it
+    if (dropTargetTaskId) {
+      const targetIndex = sectionTasks.findIndex((t) => t.id === dropTargetTaskId);
+      if (targetIndex !== -1) {
+        newPosition = sectionTasks[targetIndex].position;
+      }
+    }
 
     handleReorder(task, newPosition, sectionId);
     setDraggedTaskId(null);
+    setDropTargetTaskId(null);
   };
 
   const handleDragEnd = () => {
     setDraggedTaskId(null);
+    setDropTargetTaskId(null);
   };
 
   // Get sections for current project
