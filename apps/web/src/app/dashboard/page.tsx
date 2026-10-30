@@ -42,10 +42,10 @@ const sidebarItems = [
 
 function DashboardContent() {
   const router = useRouter();
-  const searchParams = useSearchParams();
+  const urlSearchParams = useSearchParams();
 
-  const projectId = searchParams.get('projectId');
-  const view = searchParams.get('view') || 'projects';
+  const projectId = urlSearchParams.get('projectId');
+  const view = urlSearchParams.get('view') || 'projects';
 
   // State
   const [showCreateProject, setShowCreateProject] = useState(false);
@@ -56,14 +56,14 @@ function DashboardContent() {
   const [dropTargetTaskId, setDropTargetTaskId] = useState<string | null>(null);
   
   // Search/Filter state
-  const [searchParams, setSearchParams] = useState<TaskSearchParams>({});
+  const [filterParams, setFilterParams] = useState<TaskSearchParams>({});
   
   const handleSearchChange = (params: TaskSearchParams) => {
-    setSearchParams(params);
+    setFilterParams(params);
   };
   
   const handleClearFilters = () => {
-    setSearchParams({});
+    setFilterParams({});
   };
 
   // Queries
@@ -82,7 +82,7 @@ function DashboardContent() {
   const { data: overdueData, isLoading: overdueLoading } = useOverdueTasks({ projectId: projectId || undefined });
   
   // Search hook (only used when search params are active)
-  const { data: searchData, isLoading: searchLoading } = useSearchTasks(searchParams);
+  const { data: searchData, isLoading: searchLoading } = useSearchTasks(filterParams);
   
   const { data: currentProject } = useQuery<Project | undefined>({
     queryKey: ['projects', projectId],
@@ -302,7 +302,7 @@ function DashboardContent() {
   }
   
   // If search params are active, use search results instead
-  if (Object.keys(searchParams).length > 0 && !isSearchView) {
+  if (Object.keys(filterParams).length > 0 && !isSearchView) {
     filteredTasks = searchData?.tasks || [];
     isViewLoading = searchLoading;
   }
@@ -426,7 +426,7 @@ function DashboardContent() {
 
               {/* Filters */}
               <TaskFilters
-                params={searchParams}
+                params={filterParams}
                 onChange={handleSearchChange}
                 onClear={handleClearFilters}
                 availableProjects={projects.map((p) => ({ id: p.id, name: p.name, color: p.color }))}
@@ -482,7 +482,7 @@ function DashboardContent() {
 
               {/* Filters */}
               <TaskFilters
-                params={searchParams}
+                params={filterParams}
                 onChange={handleSearchChange}
                 onClear={handleClearFilters}
                 availableProjects={projects.map((p) => ({ id: p.id, name: p.name, color: p.color }))}
