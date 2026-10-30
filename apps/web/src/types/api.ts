@@ -161,6 +161,12 @@ export interface ReorderSectionInput {
   position: number;
 }
 
+// Task Views API Response
+export interface TasksViewResponse {
+  tasks: Task[];
+  total: number;
+}
+
 // Subtask interfaces
 export interface Subtask {
   id: string;
@@ -185,4 +191,41 @@ export interface UpdateSubtaskInput {
 
 export interface ReorderSubtaskInput {
   position: number;
+}
+
+// Task Views Search/Filters
+export interface TaskSearchParams {
+  q?: string;
+  completed?: boolean;
+  projectId?: string;
+  priority?: number;
+  labelId?: string;
+  overdue?: boolean;
+  assigneeId?: string;
+  sortField?: 'dueDate' | 'priority' | 'createdAt' | 'title' | 'position';
+  sortOrder?: 'asc' | 'desc';
+  limit?: number;
+  offset?: number;
+}
+
+export interface TodayTasksParams {
+  includeCompleted?: boolean;
+  projectId?: string;
+}
+
+export interface UpcomingTasksParams {
+  includeCompleted?: boolean;
+  projectId?: string;
+  limit?: number;
+}
+
+export interface CompletedTasksParams {
+  projectId?: string;
+  limit?: number;
+  offset?: number;
+}
+
+export interface OverdueTasksParams {
+  includeCompleted?: boolean;
+  projectId?: string;
 }
