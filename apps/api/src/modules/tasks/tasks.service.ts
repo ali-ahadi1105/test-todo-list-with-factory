@@ -16,11 +16,11 @@ export class TasksService {
         priority?: number;
         labelId?: string;
         overdue?: boolean;
-        dueDate?: Date;
+        dueDate?: Date | { gte?: Date; lt?: Date; lte?: Date; gt?: Date };
         assigneeId?: string;
       };
       sort?: {
-        field: 'dueDate' | 'priority' | 'createdAt' | 'title' | 'position';
+        field: 'dueDate' | 'priority' | 'createdAt' | 'title' | 'position' | 'completedAt';
         order: 'asc' | 'desc';
       };
       groupBy?: 'dueDate' | 'priority' | 'project' | 'section';
