@@ -89,6 +89,7 @@ export function TaskList({
                   onToggleSubtask={onToggleSubtask}
                   onDeleteSubtask={onDeleteSubtask}
                   isDragging={draggedTaskId === task.id}
+                  onDragStart={_onDragStart}
                 />
               ))}
               {sectionTasks.length === 0 && (
@@ -147,6 +148,7 @@ export function TaskList({
                 onToggleSubtask={onToggleSubtask}
                 onDeleteSubtask={onDeleteSubtask}
                 isDragging={draggedTaskId === task.id}
+                onDragStart={_onDragStart}
               />
             ))}
             {noSectionTasks.length === 0 && (

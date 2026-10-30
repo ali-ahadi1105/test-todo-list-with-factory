@@ -21,6 +21,7 @@ interface TaskCardProps {
   onToggleSubtask?: (subtask: Subtask) => void;
   onDeleteSubtask?: (subtask: Subtask) => void;
   isDragging?: boolean;
+  onDragStart?: (e: React.DragEvent, task: Task) => void;
 }
 
 export function TaskCard({
@@ -32,6 +33,7 @@ export function TaskCard({
   onToggleSubtask,
   onDeleteSubtask,
   isDragging,
+  onDragStart,
 }: TaskCardProps) {
   const [showSubtasks, setShowSubtasks] = React.useState(false);
   const [newSubtaskTitle, setNewSubtaskTitle] = React.useState('');
@@ -48,6 +50,8 @@ export function TaskCard({
 
   return (
     <div
+      draggable={true}
+      onDragStart={(e) => onDragStart?.(e, task)}
       className={cn(
         'group relative rounded-lg border border-neutral-200 bg-white p-4 shadow-sm',
         'transition-shadow hover:border-neutral-300 hover:shadow-md',
