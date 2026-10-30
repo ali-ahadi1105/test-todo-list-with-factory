@@ -11,6 +11,14 @@ import {
   Project,
   Task,
   Label,
+  Section,
+  CreateSectionInput,
+  UpdateSectionInput,
+  ReorderSectionInput,
+  Subtask,
+  CreateSubtaskInput,
+  UpdateSubtaskInput,
+  ReorderSubtaskInput,
 } from '@/types/api';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000/api';
@@ -225,6 +233,102 @@ class ApiClient {
 
   async deleteLabel(id: string): Promise<void> {
     return this.request<void>(`/labels/${id}`, { method: 'DELETE' });
+  }
+
+  // Sections
+  async getSections(projectId: string): Promise<Section[]> {
+    return this.request<Section[]>(`/projects/${projectId}/sections`);
+  }
+
+  async getSection(projectId: string, id: string): Promise<Section> {
+    return this.request<Section>(`/projects/${projectId}/sections/${id}`);
+  }
+
+  async createSection(projectId: string, data: CreateSectionInput): Promise<Section> {
+    return this.request<Section>(`/projects/${projectId}/sections`, {
+      method: 'POST',
+      body: JSON.stringify(data),
+    });
+  }
+
+  async updateSection(projectId: string, id: string, data: UpdateSectionInput): Promise<Section> {
+    return this.request<Section>(`/projects/${projectId}/sections/${id}`, {
+      method: 'PATCH',
+      body: JSON.stringify(data),
+    });
+  }
+
+  async reorderSection(projectId: string, id: string, data: ReorderSectionInput): Promise<void> {
+    return this.request<void>(`/projects/${projectId}/sections/${id}/reorder`, {
+      method: 'PATCH',
+      body: JSON.stringify(data),
+    });
+  }
+
+  async deleteSection(projectId: string, id: string): Promise<void> {
+    return this.request<void>(`/projects/${projectId}/sections/${id}`, { method: 'DELETE' });
+  }
+
+  // Subtasks
+  async getSubtasks(projectId: string, taskId: string): Promise<Subtask[]> {
+    return this.request<Subtask[]>(`/projects/${projectId}/tasks/${taskId}/subtasks`);
+  }
+
+  async getSubtask(projectId: string, taskId: string, id: string): Promise<Subtask> {
+    return this.request<Subtask>(`/projects/${projectId}/tasks/${taskId}/subtasks/${id}`);
+  }
+
+  async createSubtask(
+    projectId: string,
+    taskId: string,
+    data: CreateSubtaskInput
+  ): Promise<Subtask> {
+    return this.request<Subtask>(`/projects/${projectId}/tasks/${taskId}/subtasks`, {
+      method: 'POST',
+      body: JSON.stringify(data),
+    });
+  }
+
+  async updateSubtask(
+    projectId: string,
+    taskId: string,
+    id: string,
+    data: UpdateSubtaskInput
+  ): Promise<Subtask> {
+    return this.request<Subtask>(`/projects/${projectId}/tasks/${taskId}/subtasks/${id}`, {
+      method: 'PATCH',
+      body: JSON.stringify(data),
+    });
+  }
+
+  async toggleSubtask(
+    projectId: string,
+    taskId: string,
+    id: string,
+    completed: boolean
+  ): Promise<Subtask> {
+    return this.request<Subtask>(`/projects/${projectId}/tasks/${taskId}/subtasks/${id}/toggle`, {
+      method: 'PATCH',
+      body: JSON.stringify({ completed }),
+    });
+  }
+
+  async reorderSubtask(
+    projectId: string,
+    taskId: string,
+    id: string,
+    data: ReorderSubtaskInput
+  ): Promise<void> {
+    return this.request<void>(`/projects/${projectId}/tasks/${taskId}/subtasks/${id}/reorder`, {
+      method: 'PATCH',
+      body: JSON.stringify(data),
+    });
+  }
+
+  async deleteSubtask(projectId: string, taskId: string, id: string): Promise<void> {
+    return this.request<void>(`/projects/${projectId}/tasks/${taskId}/subtasks/${id}`, {
+      method: 'DELETE',
+    });
   }
 }
 

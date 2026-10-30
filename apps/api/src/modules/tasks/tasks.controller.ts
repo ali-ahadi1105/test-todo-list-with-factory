@@ -47,6 +47,20 @@ const addLabelSchema = z.object({
   labelId: z.string(),
 });
 
+// Subtask schemas
+const createSubtaskSchema = z.object({
+  title: z.string().min(1, 'Title is required').max(200),
+});
+
+const updateSubtaskSchema = createSubtaskSchema.partial().extend({
+  completed: z.boolean().optional(),
+  position: z.number().optional(),
+});
+
+const reorderSubtaskSchema = z.object({
+  position: z.number(),
+});
+
 @ApiTags('tasks')
 @Controller('projects/:projectId/tasks')
 @UseGuards(AuthGuard('jwt'))
@@ -155,5 +169,105 @@ export class TasksController {
   ) {
     const user = req.user as { id: string };
     return this.tasksService.removeLabel(id, user.id, labelId);
+  }
+
+  // Subtask endpoints
+  @Post(':id/subtasks')
+  @ApiOperation({ summary: 'Create a new subtask' })
+  @ApiResponse({ status: 201, description: 'Subtask created' })
+  @HttpCode(HttpStatus.CREATED)
+  async createSubtask(
+    @Req() req: Request,
+    @Param('projectId') projectId: string,
+    @Param('id') id: string,
+    @Body(new ZodValidationPipe(createSubtaskSchema)) data: z.infer<typeof createSubtaskSchema>
+  ) {
+    const user = req.user as { id: string };
+    return this.tasksService.createSubtask(id, user.id, data);
+  }
+
+  @Get(':id/subtasks')
+  @ApiOperation({ summary: 'Get all subtasks for a task' })
+  @ApiResponse({ status: 200, description: 'List of subtasks' })
+  async findSubtasks(
+    @Req() req: Request,
+    @Param('projectId') projectId: string,
+    @Param('id') id: string
+  ) {
+    const user = req.user as { id: string };
+    return this.tasksService.findSubtasks(id, user.id);
+  }
+
+  @Get(':id/subtasks/:subtaskId')
+  @ApiOperation({ summary: 'Get subtask by ID' })
+  @ApiResponse({ status: 200, description: 'Subtask details' })
+  @ApiResponse({ status: 404, description: 'Subtask not found' })
+  async findSubtaskById(
+    @Req() req: Request,
+    @Param('projectId') projectId: string,
+    @Param('id') id: string,
+    @Param('subtaskId') subtaskId: string
+  ) {
+    const user = req.user as { id: string };
+    return this.tasksService.findSubtaskById(subtaskId, user.id);
+  }
+
+  @Patch(':id/subtasks/:subtaskId')
+  @ApiOperation({ summary: 'Update subtask' })
+  @ApiResponse({ status: 200, description: 'Subtask updated' })
+  @ApiResponse({ status: 404, description: 'Subtask not found' })
+  async updateSubtask(
+    @Req() req: Request,
+    @Param('projectId') projectId: string,
+    @Param('id') id: string,
+    @Param('subtaskId') subtaskId: string,
+    @Body(new ZodValidationPipe(updateSubtaskSchema)) data: z.infer<typeof updateSubtaskSchema>
+  ) {
+    const user = req.user as { id: string };
+    return this.tasksService.updateSubtask(subtaskId, user.id, data);
+  }
+
+  @Patch(':id/subtasks/:subtaskId/toggle')
+  @ApiOperation({ summary: 'Toggle subtask completion' })
+  @ApiResponse({ status: 200, description: 'Subtask toggled' })
+  @HttpCode(HttpStatus.OK)
+  async toggleSubtask(
+    @Req() req: Request,
+    @Param('projectId') projectId: string,
+    @Param('id') id: string,
+    @Param('subtaskId') subtaskId: string,
+    @Body('completed') completed: boolean
+  ) {
+    const user = req.user as { id: string };
+    return this.tasksService.toggleSubtask(subtaskId, user.id, completed);
+  }
+
+  @Patch(':id/subtasks/:subtaskId/reorder')
+  @ApiOperation({ summary: 'Reorder subtask' })
+  @ApiResponse({ status: 200, description: 'Subtask reordered' })
+  async reorderSubtask(
+    @Req() req: Request,
+    @Param('projectId') projectId: string,
+    @Param('id') id: string,
+    @Param('subtaskId') subtaskId: string,
+    @Body(new ZodValidationPipe(reorderSubtaskSchema)) data: z.infer<typeof reorderSubtaskSchema>
+  ) {
+    const user = req.user as { id: string };
+    return this.tasksService.reorderSubtask(subtaskId, user.id, data.position);
+  }
+
+  @Delete(':id/subtasks/:subtaskId')
+  @ApiOperation({ summary: 'Delete subtask' })
+  @ApiResponse({ status: 200, description: 'Subtask deleted' })
+  @ApiResponse({ status: 404, description: 'Subtask not found' })
+  @HttpCode(HttpStatus.OK)
+  async deleteSubtask(
+    @Req() req: Request,
+    @Param('projectId') projectId: string,
+    @Param('id') id: string,
+    @Param('subtaskId') subtaskId: string
+  ) {
+    const user = req.user as { id: string };
+    return this.tasksService.deleteSubtask(subtaskId, user.id);
   }
 }

@@ -163,4 +163,79 @@ export class TasksService {
       where: { taskId_labelId: { taskId, labelId } },
     });
   }
+
+  // Subtask methods
+  async createSubtask(taskId: string, userId: string, data: { title: string }) {
+    await this.findById(taskId, userId);
+
+    // Get max position for ordering
+    const maxPosition = await this.prisma.subtask.aggregate({
+      where: { taskId },
+      _max: { position: true },
+    });
+
+    return this.prisma.subtask.create({
+      data: {
+        ...data,
+        taskId,
+        position: (maxPosition._max.position || -1) + 1,
+      },
+    });
+  }
+
+  async findSubtasks(taskId: string, userId: string) {
+    await this.findById(taskId, userId);
+    return this.prisma.subtask.findMany({
+      where: { taskId },
+      orderBy: { position: 'asc' },
+    });
+  }
+
+  async findSubtaskById(id: string, userId: string) {
+    const subtask = await this.prisma.subtask.findFirst({
+      where: {
+        id,
+        task: { project: { ownerId: userId } },
+      },
+    });
+
+    if (!subtask) {
+      throw new NotFoundException('Subtask not found');
+    }
+
+    return subtask;
+  }
+
+  async updateSubtask(
+    id: string,
+    userId: string,
+    data: { title?: string; completed?: boolean; position?: number }
+  ) {
+    await this.findSubtaskById(id, userId);
+    return this.prisma.subtask.update({
+      where: { id },
+      data,
+    });
+  }
+
+  async toggleSubtask(id: string, userId: string, completed: boolean) {
+    await this.findSubtaskById(id, userId);
+    return this.prisma.subtask.update({
+      where: { id },
+      data: { completed },
+    });
+  }
+
+  async reorderSubtask(id: string, userId: string, newPosition: number) {
+    await this.findSubtaskById(id, userId);
+    return this.prisma.subtask.update({
+      where: { id },
+      data: { position: newPosition },
+    });
+  }
+
+  async deleteSubtask(id: string, userId: string) {
+    await this.findSubtaskById(id, userId);
+    return this.prisma.subtask.delete({ where: { id } });
+  }
 }

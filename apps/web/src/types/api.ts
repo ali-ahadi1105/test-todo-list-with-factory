@@ -136,3 +136,53 @@ export interface ReorderTaskInput {
 export interface AddLabelInput {
   labelId: string;
 }
+
+// Section interfaces
+export interface Section {
+  id: string;
+  name: string;
+  position: number;
+  projectId: string;
+  createdAt: string;
+  updatedAt: string;
+  tasks?: Task[];
+}
+
+export interface CreateSectionInput {
+  name: string;
+}
+
+export interface UpdateSectionInput {
+  name?: string;
+  position?: number;
+}
+
+export interface ReorderSectionInput {
+  position: number;
+}
+
+// Subtask interfaces
+export interface Subtask {
+  id: string;
+  title: string;
+  completed: boolean;
+  position: number;
+  taskId: string;
+  assigneeId: string | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface CreateSubtaskInput {
+  title: string;
+}
+
+export interface UpdateSubtaskInput {
+  title?: string;
+  completed?: boolean;
+  position?: number;
+}
+
+export interface ReorderSubtaskInput {
+  position: number;
+}

@@ -14,6 +14,14 @@ import {
   UpdateLabelInput,
   ReorderTaskInput,
   AddLabelInput,
+  Section,
+  CreateSectionInput,
+  UpdateSectionInput,
+  ReorderSectionInput,
+  Subtask,
+  CreateSubtaskInput,
+  UpdateSubtaskInput,
+  ReorderSubtaskInput,
 } from '@/types/api';
 
 // Project hooks
@@ -191,6 +199,152 @@ export function useDeleteLabel() {
     mutationFn: (id: string) => api.deleteLabel(id),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['labels'] });
+    },
+  });
+}
+
+// Section hooks
+export function useSections(projectId: string) {
+  return useQuery<Section[]>({
+    queryKey: ['sections', projectId],
+    queryFn: () => api.getSections(projectId),
+    enabled: !!projectId,
+  });
+}
+
+export function useSection(projectId: string, id: string) {
+  return useQuery<Section>({
+    queryKey: ['sections', projectId, id],
+    queryFn: () => api.getSection(projectId, id),
+    enabled: !!projectId && !!id,
+  });
+}
+
+export function useCreateSection(projectId: string) {
+  const queryClient = useQueryClient();
+  return useMutation<Section, Error, CreateSectionInput>({
+    mutationFn: (data: CreateSectionInput) => api.createSection(projectId, data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['sections', projectId] });
+      queryClient.invalidateQueries({ queryKey: ['projects', projectId] });
+    },
+  });
+}
+
+export function useUpdateSection(projectId: string) {
+  const queryClient = useQueryClient();
+  return useMutation<Section, Error, { id: string; data: UpdateSectionInput }>({
+    mutationFn: ({ id, data }: { id: string; data: UpdateSectionInput }) =>
+      api.updateSection(projectId, id, data),
+    onSuccess: (_, { id }) => {
+      queryClient.invalidateQueries({ queryKey: ['sections', projectId] });
+      queryClient.invalidateQueries({ queryKey: ['sections', projectId, id] });
+      queryClient.invalidateQueries({ queryKey: ['projects', projectId] });
+    },
+  });
+}
+
+export function useReorderSection(projectId: string) {
+  const queryClient = useQueryClient();
+  return useMutation<void, Error, { id: string; data: ReorderSectionInput }>({
+    mutationFn: ({ id, data }: { id: string; data: ReorderSectionInput }) =>
+      api.reorderSection(projectId, id, data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['sections', projectId] });
+      queryClient.invalidateQueries({ queryKey: ['projects', projectId] });
+    },
+  });
+}
+
+export function useDeleteSection(projectId: string) {
+  const queryClient = useQueryClient();
+  return useMutation<void, Error, string>({
+    mutationFn: (id: string) => api.deleteSection(projectId, id),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['sections', projectId] });
+      queryClient.invalidateQueries({ queryKey: ['projects', projectId] });
+    },
+  });
+}
+
+// Subtask hooks
+export function useSubtasks(projectId: string, taskId: string) {
+  return useQuery<Subtask[]>({
+    queryKey: ['subtasks', projectId, taskId],
+    queryFn: () => api.getSubtasks(projectId, taskId),
+    enabled: !!projectId && !!taskId,
+  });
+}
+
+export function useSubtask(projectId: string, taskId: string, id: string) {
+  return useQuery<Subtask>({
+    queryKey: ['subtasks', projectId, taskId, id],
+    queryFn: () => api.getSubtask(projectId, taskId, id),
+    enabled: !!projectId && !!taskId && !!id,
+  });
+}
+
+export function useCreateSubtask(projectId: string, taskId: string) {
+  const queryClient = useQueryClient();
+  return useMutation<Subtask, Error, CreateSubtaskInput>({
+    mutationFn: (data: CreateSubtaskInput) => api.createSubtask(projectId, taskId, data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['subtasks', projectId, taskId] });
+      queryClient.invalidateQueries({ queryKey: ['tasks', projectId] });
+      queryClient.invalidateQueries({ queryKey: ['tasks', projectId, taskId] });
+    },
+  });
+}
+
+export function useUpdateSubtask(projectId: string, taskId: string) {
+  const queryClient = useQueryClient();
+  return useMutation<Subtask, Error, { id: string; data: UpdateSubtaskInput }>({
+    mutationFn: ({ id, data }: { id: string; data: UpdateSubtaskInput }) =>
+      api.updateSubtask(projectId, taskId, id, data),
+    onSuccess: (_, { id }) => {
+      queryClient.invalidateQueries({ queryKey: ['subtasks', projectId, taskId] });
+      queryClient.invalidateQueries({ queryKey: ['subtasks', projectId, taskId, id] });
+      queryClient.invalidateQueries({ queryKey: ['tasks', projectId] });
+      queryClient.invalidateQueries({ queryKey: ['tasks', projectId, taskId] });
+    },
+  });
+}
+
+export function useToggleSubtask(projectId: string, taskId: string) {
+  const queryClient = useQueryClient();
+  return useMutation<Subtask, Error, { id: string; completed: boolean }>({
+    mutationFn: ({ id, completed }: { id: string; completed: boolean }) =>
+      api.toggleSubtask(projectId, taskId, id, completed),
+    onSuccess: (_, { id }) => {
+      queryClient.invalidateQueries({ queryKey: ['subtasks', projectId, taskId] });
+      queryClient.invalidateQueries({ queryKey: ['subtasks', projectId, taskId, id] });
+      queryClient.invalidateQueries({ queryKey: ['tasks', projectId] });
+      queryClient.invalidateQueries({ queryKey: ['tasks', projectId, taskId] });
+    },
+  });
+}
+
+export function useReorderSubtask(projectId: string, taskId: string) {
+  const queryClient = useQueryClient();
+  return useMutation<void, Error, { id: string; data: ReorderSubtaskInput }>({
+    mutationFn: ({ id, data }: { id: string; data: ReorderSubtaskInput }) =>
+      api.reorderSubtask(projectId, taskId, id, data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['subtasks', projectId, taskId] });
+      queryClient.invalidateQueries({ queryKey: ['tasks', projectId] });
+      queryClient.invalidateQueries({ queryKey: ['tasks', projectId, taskId] });
+    },
+  });
+}
+
+export function useDeleteSubtask(projectId: string, taskId: string) {
+  const queryClient = useQueryClient();
+  return useMutation<void, Error, string>({
+    mutationFn: (id: string) => api.deleteSubtask(projectId, taskId, id),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['subtasks', projectId, taskId] });
+      queryClient.invalidateQueries({ queryKey: ['tasks', projectId] });
+      queryClient.invalidateQueries({ queryKey: ['tasks', projectId, taskId] });
     },
   });
 }
