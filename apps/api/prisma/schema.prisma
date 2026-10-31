@@ -126,6 +126,7 @@ model UserSettings {
   userId                String   @unique
   user                  User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   theme                 String   @default("system")
+  timezone              String   @default("UTC")
   notificationsEnabled  Boolean  @default(true)
   emailNotifications    Boolean  @default(true)
   createdAt             DateTime @default(now())

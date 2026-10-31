@@ -1,9 +1,45 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../../prisma/prisma.service';
+import { formatInTimeZone } from 'date-fns-tz';
+import { startOfDay, endOfDay, parseISO } from 'date-fns';
+import { Prisma } from '@prisma/client';
 
 @Injectable()
 export class TasksService {
   constructor(private prisma: PrismaService) {}
+
+  /**
+   * Get user's timezone from settings
+   */
+  private async getUserTimezone(userId: string): Promise<string> {
+    const settings = await this.prisma.userSettings.findUnique({
+      where: { userId },
+      select: { timezone: true },
+    });
+    return settings?.timezone || 'UTC';
+  }
+
+  /**
+   * Get the start and end of a day in user's timezone, converted to UTC for database queries
+   */
+  private async getDayBoundsInUTC(userId: string, date: Date): Promise<{ start: Date; end: Date }> {
+    const timezone = await this.getUserTimezone(userId);
+
+    // Create start of day in user's timezone (midnight) - use formatInTimeZone to get the ISO string
+    const startOfDayInTzStr = formatInTimeZone(
+      startOfDay(date),
+      timezone,
+      "yyyy-MM-dd'T'HH:mm:ssXXX"
+    );
+    // Create end of day in user's timezone (23:59:59.999)
+    const endOfDayInTzStr = formatInTimeZone(endOfDay(date), timezone, "yyyy-MM-dd'T'HH:mm:ssXXX");
+
+    // Convert to UTC for database storage
+    return {
+      start: parseISO(startOfDayInTzStr),
+      end: parseISO(endOfDayInTzStr),
+    };
+  }
 
   // User-level task queries
   async findByUserId(
@@ -28,7 +64,7 @@ export class TasksService {
       offset?: number;
     }
   ) {
-    const where: any = {
+    const where: Prisma.TaskWhereInput = {
       project: { ownerId: userId },
     };
 
@@ -69,7 +105,7 @@ export class TasksService {
     }
 
     // Build orderBy
-    let orderBy: any = [{ position: 'asc' }];
+    let orderBy: Prisma.TaskOrderByWithRelationInput[] = [{ position: 'asc' }];
     if (options?.sort) {
       switch (options.sort.field) {
         case 'dueDate':
@@ -112,32 +148,36 @@ export class TasksService {
 
   async findToday(userId: string, options?: { includeCompleted?: boolean; projectId?: string }) {
     const today = new Date();
-    today.setHours(0, 0, 0, 0);
-    const tomorrow = new Date(today);
-    tomorrow.setDate(tomorrow.getDate() + 1);
+    const { start, end } = await this.getDayBoundsInUTC(userId, today);
 
     return this.findByUserId(userId, {
       completed: options?.includeCompleted ? undefined : false,
       projectId: options?.projectId,
-      filter: { dueDate: { gte: today, lt: tomorrow } },
+      filter: { dueDate: { gte: start, lt: end } },
       sort: { field: 'dueDate', order: 'asc' },
     });
   }
 
-  async findUpcoming(userId: string, options?: { includeCompleted?: boolean; projectId?: string; limit?: number }) {
+  async findUpcoming(
+    userId: string,
+    options?: { includeCompleted?: boolean; projectId?: string; limit?: number }
+  ) {
     const today = new Date();
-    today.setHours(0, 0, 0, 0);
+    const { start } = await this.getDayBoundsInUTC(userId, today);
 
     return this.findByUserId(userId, {
       completed: options?.includeCompleted ? undefined : false,
       projectId: options?.projectId,
-      filter: { dueDate: { gte: today } },
+      filter: { dueDate: { gte: start } },
       sort: { field: 'dueDate', order: 'asc' },
       limit: options?.limit,
     });
   }
 
-  async findCompleted(userId: string, options?: { projectId?: string; limit?: number; offset?: number }) {
+  async findCompleted(
+    userId: string,
+    options?: { projectId?: string; limit?: number; offset?: number }
+  ) {
     return this.findByUserId(userId, {
       completed: true,
       projectId: options?.projectId,
@@ -149,12 +189,12 @@ export class TasksService {
 
   async findOverdue(userId: string, options?: { includeCompleted?: boolean; projectId?: string }) {
     const today = new Date();
-    today.setHours(0, 0, 0, 0);
+    const { start } = await this.getDayBoundsInUTC(userId, today);
 
     return this.findByUserId(userId, {
-      completed: options?.includeCompleted ? undefined : false,
+      completed: false,
       projectId: options?.projectId,
-      filter: { overdue: true },
+      filter: { dueDate: { lt: start } },
       sort: { field: 'dueDate', order: 'asc' },
     });
   }

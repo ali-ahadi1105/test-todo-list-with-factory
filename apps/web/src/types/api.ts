@@ -84,6 +84,24 @@ export interface Tokens {
   refreshToken: string;
 }
 
+export interface UserSettings {
+  id: string;
+  userId: string;
+  theme: 'light' | 'dark' | 'system';
+  notificationsEnabled: boolean;
+  emailNotifications: boolean;
+  timezone: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface UpdateUserSettingsInput {
+  theme?: 'light' | 'dark' | 'system';
+  notificationsEnabled?: boolean;
+  emailNotifications?: boolean;
+  timezone?: string;
+}
+
 export interface CreateTaskInput {
   title: string;
   description?: string;

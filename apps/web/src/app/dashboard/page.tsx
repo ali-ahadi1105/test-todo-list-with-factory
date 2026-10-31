@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, Suspense, useMemo } from 'react';
+import React, { useState, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useQuery } from '@tanstack/react-query';
 import { api } from '@/lib/api';
@@ -38,6 +38,7 @@ const sidebarItems = [
   { id: 'labels', label: 'Labels', icon: 'tag' },
   { id: 'completed', label: 'Completed', icon: 'check-circle' },
   { id: 'search', label: 'Search', icon: 'search' },
+  { id: 'settings', label: 'Settings', icon: 'settings', href: '/dashboard/settings' },
 ];
 
 function DashboardContent() {
@@ -54,14 +55,14 @@ function DashboardContent() {
   const [newProjectName, setNewProjectName] = useState('');
   const [draggedTaskId, setDraggedTaskId] = useState<string | null>(null);
   const [dropTargetTaskId, setDropTargetTaskId] = useState<string | null>(null);
-  
+
   // Search/Filter state
   const [filterParams, setFilterParams] = useState<TaskSearchParams>({});
-  
+
   const handleSearchChange = (params: TaskSearchParams) => {
     setFilterParams(params);
   };
-  
+
   const handleClearFilters = () => {
     setFilterParams({});
   };
@@ -74,16 +75,24 @@ function DashboardContent() {
     isLoading: tasksLoading,
     refetch: refetchTasks,
   } = useTasks(projectId || '');
-  
+
   // New view hooks
-  const { data: todayData, isLoading: todayLoading } = useTodayTasks({ projectId: projectId || undefined });
-  const { data: upcomingData, isLoading: upcomingLoading } = useUpcomingTasks({ projectId: projectId || undefined });
-  const { data: completedData, isLoading: completedLoading } = useCompletedTasks({ projectId: projectId || undefined });
-  const { data: overdueData, isLoading: overdueLoading } = useOverdueTasks({ projectId: projectId || undefined });
-  
+  const { data: todayData, isLoading: todayLoading } = useTodayTasks({
+    projectId: projectId || undefined,
+  });
+  const { data: upcomingData, isLoading: upcomingLoading } = useUpcomingTasks({
+    projectId: projectId || undefined,
+  });
+  const { data: completedData, isLoading: completedLoading } = useCompletedTasks({
+    projectId: projectId || undefined,
+  });
+  const { data: overdueData, isLoading: overdueLoading } = useOverdueTasks({
+    projectId: projectId || undefined,
+  });
+
   // Search hook (only used when search params are active)
   const { data: searchData, isLoading: searchLoading } = useSearchTasks(filterParams);
-  
+
   const { data: currentProject } = useQuery<Project | undefined>({
     queryKey: ['projects', projectId],
     queryFn: async () => {
@@ -282,7 +291,7 @@ function DashboardContent() {
   let filteredTasks: Task[] = tasks;
   let isViewLoading = tasksLoading;
   let isSearchView = false;
-  
+
   if (view === 'today') {
     filteredTasks = todayData?.tasks || [];
     isViewLoading = todayLoading;
@@ -300,7 +309,7 @@ function DashboardContent() {
     isViewLoading = searchLoading;
     isSearchView = true;
   }
-  
+
   // If search params are active, use search results instead
   if (Object.keys(filterParams).length > 0 && !isSearchView) {
     filteredTasks = searchData?.tasks || [];
@@ -429,7 +438,11 @@ function DashboardContent() {
                 params={filterParams}
                 onChange={handleSearchChange}
                 onClear={handleClearFilters}
-                availableProjects={projects.map((p) => ({ id: p.id, name: p.name, color: p.color }))}
+                availableProjects={projects.map((p) => ({
+                  id: p.id,
+                  name: p.name,
+                  color: p.color,
+                }))}
                 availableLabels={labels}
               />
 
@@ -459,7 +472,10 @@ function DashboardContent() {
                 />
               )}
             </div>
-          ) : view === 'today' || view === 'upcoming' || view === 'overdue' || view === 'completed' ? (
+          ) : view === 'today' ||
+            view === 'upcoming' ||
+            view === 'overdue' ||
+            view === 'completed' ? (
             // Today/Upcoming/Overdue/Completed view
             <div className="space-y-6">
               <div className="rounded-lg border border-neutral-200 bg-white p-3">
@@ -485,7 +501,11 @@ function DashboardContent() {
                 params={filterParams}
                 onChange={handleSearchChange}
                 onClear={handleClearFilters}
-                availableProjects={projects.map((p) => ({ id: p.id, name: p.name, color: p.color }))}
+                availableProjects={projects.map((p) => ({
+                  id: p.id,
+                  name: p.name,
+                  color: p.color,
+                }))}
                 availableLabels={labels}
               />
 
@@ -511,9 +531,9 @@ function DashboardContent() {
                     />
                   </svg>
                   <p className="mt-4 text-lg text-neutral-500">
-                    {view === 'today' 
-                      ? 'No tasks for today' 
-                      : view === 'upcoming' 
+                    {view === 'today'
+                      ? 'No tasks for today'
+                      : view === 'upcoming'
                         ? 'No upcoming tasks'
                         : view === 'completed'
                           ? 'No completed tasks'
@@ -522,9 +542,9 @@ function DashboardContent() {
                             : 'No tasks'}
                   </p>
                   <p className="mt-1 text-sm text-neutral-400">
-                    {view === 'today' 
-                      ? 'Enjoy your day!' 
-                      : view === 'upcoming' 
+                    {view === 'today'
+                      ? 'Enjoy your day!'
+                      : view === 'upcoming'
                         ? 'All caught up!'
                         : view === 'completed'
                           ? 'Complete some tasks to see them here'

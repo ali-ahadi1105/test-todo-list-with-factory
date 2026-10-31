@@ -8,6 +8,7 @@ export { cn } from './utils/cn';
 export { Button, type ButtonProps } from './components/Button';
 export { Input, type InputProps } from './components/Input';
 export { Select, type SelectProps, type SelectOption } from './components/Select';
+export { Switch, type SwitchProps } from './components/Switch';
 export { Modal, type ModalProps } from './components/Modal';
 export {
   Card,
