@@ -4,6 +4,10 @@ import { formatInTimeZone } from 'date-fns-tz';
 import { startOfDay, endOfDay, parseISO } from 'date-fns';
 import { Prisma } from '@prisma/client';
 
+// Import Prisma types from the generated client
+type TaskWhereInput = Prisma.TaskWhereInput;
+type TaskOrderByWithRelationInput = Prisma.TaskOrderByWithRelationInput;
+
 @Injectable()
 export class TasksService {
   constructor(private prisma: PrismaService) {}
@@ -64,7 +68,7 @@ export class TasksService {
       offset?: number;
     }
   ) {
-    const where: Prisma.TaskWhereInput = {
+    const where: TaskWhereInput = {
       project: { ownerId: userId },
     };
 
@@ -105,7 +109,7 @@ export class TasksService {
     }
 
     // Build orderBy
-    let orderBy: Prisma.TaskOrderByWithRelationInput[] = [{ position: 'asc' }];
+    let orderBy: TaskOrderByWithRelationInput[] = [{ position: 'asc' }];
     if (options?.sort) {
       switch (options.sort.field) {
         case 'dueDate':
