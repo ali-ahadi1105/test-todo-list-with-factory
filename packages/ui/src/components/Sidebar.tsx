@@ -71,6 +71,9 @@ export const Sidebar: React.FC<SidebarProps> = ({
     const [isExpanded, setIsExpanded] = useState(!collapsed || isActive);
 
     const handleClick = (e: React.MouseEvent) => {
+      // If item has an href, let the browser handle navigation
+      if (item.href) return;
+      
       e.preventDefault();
       if (hasChildren && !collapsed) {
         setIsExpanded(!isExpanded);
@@ -85,11 +88,15 @@ export const Sidebar: React.FC<SidebarProps> = ({
 
     if (collapsed && depth > 0) return null;
 
+    const isLink = !!item.href;
+    const Element = isLink ? 'a' : 'button';
+
     return (
       <div key={item.id}>
-        <button
+        <Element
+          href={isLink ? item.href : undefined}
           onClick={handleClick}
-          disabled={item.disabled}
+          disabled={!isLink && item.disabled}
           className={cn(
             'w-full flex items-center gap-3 px-3 py-2 rounded-lg',
             'transition-colors duration-200',
@@ -137,7 +144,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
               />
             </svg>
           )}
-        </button>
+        </Element>
         {!collapsed && hasChildren && isExpanded && (
           <div className="mt-1 space-y-1">
             {item.children!.map((child) => renderItem(child, depth + 1))}

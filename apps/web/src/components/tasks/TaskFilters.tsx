@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import { Button, Select, Input, cn } from '@todo/ui';
+import { Button, Select, Input } from '@todo/ui';
 import { TaskSearchParams } from '@/types/api';
 
 interface TaskFiltersProps {
@@ -29,10 +29,10 @@ export function TaskFilters({
 
   const handleSortChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const [field, order] = e.target.value.split(':');
-    onChange({ 
-      ...params, 
-      sortField: field as TaskSearchParams['sortField'] || undefined,
-      sortOrder: order as TaskSearchParams['sortOrder'] || undefined,
+    onChange({
+      ...params,
+      sortField: (field as TaskSearchParams['sortField']) || undefined,
+      sortOrder: (order as TaskSearchParams['sortOrder']) || undefined,
     });
   };
 
@@ -44,11 +44,11 @@ export function TaskFilters({
   };
 
   return (
-    <div className="flex flex-wrap items-center gap-3 p-4 bg-white border border-neutral-200 rounded-lg">
+    <div className="flex flex-wrap items-center gap-3 rounded-lg border border-neutral-200 bg-white p-4">
       {/* Search */}
-      <div className="relative flex-1 min-w-[200px] max-w-xs">
+      <div className="relative min-w-[200px] max-w-xs flex-1">
         <svg
-          className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-neutral-400"
+          className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-neutral-400"
           fill="none"
           stroke="currentColor"
           viewBox="0 0 24 24"
@@ -79,75 +79,88 @@ export function TaskFilters({
           value={`${params.sortField || 'position'}:${params.sortOrder || 'asc'}`}
           onChange={handleSortChange}
           className="w-48"
-        >
-          <option value="position:asc">Manual</option>
-          <option value="dueDate:asc">Due Date (Oldest First)</option>
-          <option value="dueDate:desc">Due Date (Newest First)</option>
-          <option value="priority:asc">Priority (Low to High)</option>
-          <option value="priority:desc">Priority (High to Low)</option>
-          <option value="createdAt:asc">Created (Oldest First)</option>
-          <option value="createdAt:desc">Created (Newest First)</option>
-          <option value="title:asc">Title (A-Z)</option>
-          <option value="title:desc">Title (Z-A)</option>
-        </Select>
+          options={[
+            { value: 'position:asc', label: 'Manual' },
+            { value: 'dueDate:asc', label: 'Due Date (Oldest First)' },
+            { value: 'dueDate:desc', label: 'Due Date (Newest First)' },
+            { value: 'priority:asc', label: 'Priority (Low to High)' },
+            { value: 'priority:desc', label: 'Priority (High to Low)' },
+            { value: 'createdAt:asc', label: 'Created (Oldest First)' },
+            { value: 'createdAt:desc', label: 'Created (Newest First)' },
+            { value: 'title:asc', label: 'Title (A-Z)' },
+            { value: 'title:desc', label: 'Title (Z-A)' },
+          ]}
+        />
       </div>
 
       {/* Filters */}
-      <div className="flex flex-wrap items-center gap-2 ml-auto">
+      <div className="ml-auto flex flex-wrap items-center gap-2">
         {/* Status Filter */}
         <Select
-          value={params.completed === true ? 'completed' : params.completed === false ? 'active' : 'all'}
-          onChange={(e) => handleFilterChange('completed', e.target.value === 'all' ? undefined : e.target.value === 'completed')}
+          value={
+            params.completed === true ? 'completed' : params.completed === false ? 'active' : 'all'
+          }
+          onChange={(e) =>
+            handleFilterChange(
+              'completed',
+              e.target.value === 'all' ? undefined : e.target.value === 'completed'
+            )
+          }
           className="w-32"
-        >
-          <option value="all">All</option>
-          <option value="active">Active</option>
-          <option value="completed">Completed</option>
-        </Select>
+          options={[
+            { value: 'all', label: 'All' },
+            { value: 'active', label: 'Active' },
+            { value: 'completed', label: 'Completed' },
+          ]}
+        />
 
         {/* Priority Filter */}
         <Select
           value={params.priority?.toString() || 'all'}
-          onChange={(e) => handleFilterChange('priority', e.target.value === 'all' ? undefined : parseInt(e.target.value))}
+          onChange={(e) =>
+            handleFilterChange(
+              'priority',
+              e.target.value === 'all' ? undefined : parseInt(e.target.value)
+            )
+          }
           className="w-32"
-        >
-          <option value="all">All Priorities</option>
-          <option value="1">P1</option>
-          <option value="2">P2</option>
-          <option value="3">P3</option>
-          <option value="4">P4</option>
-        </Select>
+          options={[
+            { value: 'all', label: 'All Priorities' },
+            { value: '1', label: 'P1' },
+            { value: '2', label: 'P2' },
+            { value: '3', label: 'P3' },
+            { value: '4', label: 'P4' },
+          ]}
+        />
 
         {/* Project Filter */}
         {availableProjects.length > 0 && (
           <Select
             value={params.projectId || 'all'}
-            onChange={(e) => handleFilterChange('projectId', e.target.value === 'all' ? undefined : e.target.value)}
+            onChange={(e) =>
+              handleFilterChange('projectId', e.target.value === 'all' ? undefined : e.target.value)
+            }
             className="w-40"
-          >
-            <option value="all">All Projects</option>
-            {availableProjects.map((project) => (
-              <option key={project.id} value={project.id}>
-                {project.name}
-              </option>
-            ))}
-          </Select>
+            options={[
+              { value: 'all', label: 'All Projects' },
+              ...availableProjects.map((project) => ({ value: project.id, label: project.name })),
+            ]}
+          />
         )}
 
         {/* Label Filter */}
         {availableLabels.length > 0 && (
           <Select
             value={params.labelId || 'all'}
-            onChange={(e) => handleFilterChange('labelId', e.target.value === 'all' ? undefined : e.target.value)}
+            onChange={(e) =>
+              handleFilterChange('labelId', e.target.value === 'all' ? undefined : e.target.value)
+            }
             className="w-40"
-          >
-            <option value="all">All Labels</option>
-            {availableLabels.map((label) => (
-              <option key={label.id} value={label.id}>
-                {label.name}
-              </option>
-            ))}
-          </Select>
+            options={[
+              { value: 'all', label: 'All Labels' },
+              ...availableLabels.map((label) => ({ value: label.id, label: label.name })),
+            ]}
+          />
         )}
 
         {/* Overdue Filter */}
@@ -156,7 +169,7 @@ export function TaskFilters({
             type="checkbox"
             checked={params.overdue === true}
             onChange={(e) => handleFilterChange('overdue', e.target.checked || undefined)}
-            className="rounded border-neutral-300 text-primary-600 focus:ring-primary-500"
+            className="text-primary-600 focus:ring-primary-500 rounded border-neutral-300"
           />
           Overdue
         </label>

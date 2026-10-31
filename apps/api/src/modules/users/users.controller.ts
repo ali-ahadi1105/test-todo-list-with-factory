@@ -3,6 +3,8 @@ import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth } from '@nestjs/swagg
 import { AuthGuard } from '@nestjs/passport';
 import { UsersService } from './users.service';
 import { Request } from 'express';
+import { ZodValidationPipe } from '../../common/pipes/zod-validation.pipe';
+import { updateUserSettingsSchema, UpdateUserSettingsDto } from './dto/user-settings.dto';
 
 @ApiTags('users')
 @Controller('users')
@@ -17,6 +19,25 @@ export class UsersController {
   async getProfile(@Req() req: Request) {
     const user = req.user as { id: string };
     return this.usersService.findById(user.id);
+  }
+
+  @Get('me/settings')
+  @ApiOperation({ summary: 'Get current user settings' })
+  @ApiResponse({ status: 200, description: 'User settings' })
+  async getSettings(@Req() req: Request) {
+    const user = req.user as { id: string };
+    return this.usersService.getSettings(user.id);
+  }
+
+  @Patch('me/settings')
+  @ApiOperation({ summary: 'Update current user settings' })
+  @ApiResponse({ status: 200, description: 'Settings updated' })
+  async updateSettings(
+    @Req() req: Request,
+    @Body(new ZodValidationPipe(updateUserSettingsSchema)) data: UpdateUserSettingsDto
+  ) {
+    const user = req.user as { id: string };
+    return this.usersService.updateSettings(user.id, data);
   }
 
   @Get(':id')

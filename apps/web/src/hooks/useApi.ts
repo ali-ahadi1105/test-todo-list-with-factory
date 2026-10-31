@@ -28,6 +28,8 @@ import {
   UpcomingTasksParams,
   CompletedTasksParams,
   OverdueTasksParams,
+  UserSettings,
+  UpdateUserSettingsInput,
 } from '@/types/api';
 
 // Project hooks
@@ -442,5 +444,23 @@ export function useSearchTasks(params: TaskSearchParams = {}) {
     queryKey: ['tasks', 'search', params],
     queryFn: () => api.searchTasks(params),
     enabled: Object.keys(params).length > 0,
+  });
+}
+
+// User Settings hooks
+export function useUserSettings() {
+  return useQuery<UserSettings>({
+    queryKey: ['userSettings'],
+    queryFn: () => api.getSettings(),
+  });
+}
+
+export function useUpdateUserSettings() {
+  const queryClient = useQueryClient();
+  return useMutation<UserSettings, Error, UpdateUserSettingsInput>({
+    mutationFn: (data: UpdateUserSettingsInput) => api.updateSettings(data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['userSettings'] });
+    },
   });
 }

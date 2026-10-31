@@ -25,6 +25,8 @@ import {
   UpcomingTasksParams,
   CompletedTasksParams,
   OverdueTasksParams,
+  UserSettings,
+  UpdateUserSettingsInput,
 } from '@/types/api';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000/api';
@@ -138,6 +140,18 @@ class ApiClient {
 
   async getProfile() {
     return this.request('/auth/me');
+  }
+
+  // User Settings
+  async getSettings(): Promise<UserSettings> {
+    return this.request<UserSettings>('/users/me/settings');
+  }
+
+  async updateSettings(data: UpdateUserSettingsInput): Promise<UserSettings> {
+    return this.request<UserSettings>('/users/me/settings', {
+      method: 'PATCH',
+      body: JSON.stringify(data),
+    });
   }
 
   // Projects
