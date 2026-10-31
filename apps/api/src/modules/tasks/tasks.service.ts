@@ -4,7 +4,7 @@ import { formatInTimeZone } from 'date-fns-tz';
 import { startOfDay, endOfDay, parseISO } from 'date-fns';
 import { Prisma } from '@prisma/client';
 
-// Import Prisma types from the generated client
+// Use Prisma namespace types directly
 type TaskWhereInput = Prisma.TaskWhereInput;
 type TaskOrderByWithRelationInput = Prisma.TaskOrderByWithRelationInput;
 
