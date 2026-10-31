@@ -1,10 +1,4 @@
-import {
-  Controller,
-  Get,
-  Query,
-  UseGuards,
-  Req,
-} from '@nestjs/common';
+import { Controller, Get, Query, UseGuards, Req } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth, ApiQuery } from '@nestjs/swagger';
 import { AuthGuard } from '@nestjs/passport';
 import { TasksService } from './tasks.service';
@@ -101,7 +95,12 @@ export class TasksViewsController {
   @ApiQuery({ name: 'labelId', required: false, type: String })
   @ApiQuery({ name: 'overdue', required: false, type: Boolean })
   @ApiQuery({ name: 'assigneeId', required: false, type: String })
-  @ApiQuery({ name: 'sortField', required: false, type: String, enum: ['dueDate', 'priority', 'createdAt', 'title', 'position'] })
+  @ApiQuery({
+    name: 'sortField',
+    required: false,
+    type: String,
+    enum: ['dueDate', 'priority', 'createdAt', 'title', 'position'],
+  })
   @ApiQuery({ name: 'sortOrder', required: false, type: String, enum: ['asc', 'desc'] })
   @ApiQuery({ name: 'limit', required: false, type: Number })
   @ApiQuery({ name: 'offset', required: false, type: Number })
